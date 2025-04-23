@@ -1,5 +1,6 @@
 import { User } from "../models/userModel";
 import { verifyOtp } from "../utils/otp";
+import { hashPin } from "../utils/pin";
 
 interface SignUpData {
   first_name: string;
@@ -21,7 +22,7 @@ const userExists = async (phone_number: string) => {
     }
 
     if (user.dataValues.verified) {
-      return { exists: true };
+      return { exists: true, user: user?.dataValues };
     }
 
     return { exists: false, error: "User found but not verified" };
@@ -33,7 +34,11 @@ const userExists = async (phone_number: string) => {
 
 export const addUser = async (data: SignUpData) => {
   try {
-    const newUser = await User.create({ ...data, verified: false });
+    const newUser = await User.create({
+      ...data,
+      pin: await hashPin(data.pin),
+      verified: false,
+    });
 
     return { success: true, data: newUser };
   } catch (error) {

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { userServices } from "../services/userServices";
 import { generateOtp, storeOtp } from "../utils/otp";
+import { verifyPin } from "../utils/pin";
 
 interface SignUpData {
   first_name: string;
@@ -12,6 +13,11 @@ interface SignUpData {
 interface VerifyData {
   user_id: string;
   otp: string;
+}
+
+interface LoginData {
+  phone_number: string;
+  pin: string;
 }
 
 export const signUpUser = async (req: Request, res: Response) => {
@@ -88,6 +94,46 @@ export const verifySignUp = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error verifying user", error);
     res.status(500).json({ error: "Error verifying user" });
+    return;
+  }
+};
+
+export const loginUser = async (req: Request, res: Response) => {
+  const loginData: LoginData = req.body;
+
+  const userExists = await userServices.userExists(loginData.phone_number);
+
+  if (userExists.error === "User found but not verified") {
+    res.status(409).json({ error: "User found but not verified" });
+    return;
+  }
+
+  if (userExists.error === "Error checking user existence") {
+    res.status(500).json({ error: "Internal server error" });
+    return;
+  }
+
+  if (!userExists.exists) {
+    res.status(404).json({ error: "User not found" });
+    return;
+  }
+
+  const checkPin = await verifyPin(loginData.pin, String(userExists.user?.pin));
+
+  if (!checkPin) {
+    res.status(401).json({ error: "Incorrect password" });
+    return;
+  }
+
+  res.status(200).json({
+    success: "Login successful",
+    user: userExists.user,
+  });
+
+  try {
+  } catch (error) {
+    console.error("Error in user login", error);
+    res.status(500).json({ error: "Error logging user in" });
     return;
   }
 };
