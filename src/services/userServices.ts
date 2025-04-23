@@ -25,7 +25,11 @@ const userExists = async (phone_number: string) => {
       return { exists: true, user: user?.dataValues };
     }
 
-    return { exists: false, error: "User found but not verified" };
+    return {
+      exists: false,
+      error: "User found but not verified",
+      user: user.dataValues,
+    };
   } catch (error) {
     console.error("Error checking if user exists", error);
     return { exists: false, error: "Error checking user existence" };
@@ -47,14 +51,14 @@ export const addUser = async (data: SignUpData) => {
   }
 };
 
-const verifyUser = async (otp: string, user_id: string) => {
+const verifyUser = async (otp: string, phone_number: string) => {
   try {
-    const verify = await verifyOtp(user_id, otp);
+    const verify = await verifyOtp(phone_number, otp);
 
     if (verify.success) {
       const response = await User.update(
         { verified: true },
-        { where: { id: user_id } }
+        { where: { id: phone_number } }
       );
 
       if (response) {

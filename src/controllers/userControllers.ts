@@ -11,11 +11,16 @@ interface SignUpData {
 }
 
 interface VerifyData {
-  user_id: string;
   otp: string;
+  id: string;
 }
 
 interface LoginData {
+  phone_number: string;
+  pin: string;
+}
+
+interface SignInData {
   phone_number: string;
   pin: string;
 }
@@ -27,12 +32,23 @@ export const signUpUser = async (req: Request, res: Response) => {
     const userCheck = await userServices.userExists(registerData.phone_number);
 
     if (userCheck.exists) {
-      res.status(409).json({ error: "User already exists and verified" });
+      res.status(409).json({ error: "User already exists" });
       return;
     }
 
+    const user_id = String(userCheck.user?.id);
+
     if (userCheck.error === "User found but not verified") {
-      res.status(409).json({ error: "User found but not verified" });
+      const otp = generateOtp();
+
+      await storeOtp(String(userCheck.user?.id), otp);
+
+      res.status(201).json({
+        success: "User signed up successfully",
+        data: userCheck.user,
+        otp,
+      });
+
       return;
     }
 
@@ -69,13 +85,13 @@ export const signUpUser = async (req: Request, res: Response) => {
   }
 };
 
-export const verifySignUp = async (req: Request, res: Response) => {
+export const verify = async (req: Request, res: Response) => {
   const verifyData: VerifyData = req.body;
 
   try {
     const verified = await userServices.verifyUser(
       verifyData.otp,
-      verifyData.user_id
+      verifyData.id
     );
 
     if (!verified?.verified) {
@@ -101,39 +117,88 @@ export const verifySignUp = async (req: Request, res: Response) => {
 export const loginUser = async (req: Request, res: Response) => {
   const loginData: LoginData = req.body;
 
-  const userExists = await userServices.userExists(loginData.phone_number);
-
-  if (userExists.error === "User found but not verified") {
-    res.status(409).json({ error: "User found but not verified" });
-    return;
-  }
-
-  if (userExists.error === "Error checking user existence") {
-    res.status(500).json({ error: "Internal server error" });
-    return;
-  }
-
-  if (!userExists.exists) {
-    res.status(404).json({ error: "User not found" });
-    return;
-  }
-
-  const checkPin = await verifyPin(loginData.pin, String(userExists.user?.pin));
-
-  if (!checkPin) {
-    res.status(401).json({ error: "Incorrect password" });
-    return;
-  }
-
-  res.status(200).json({
-    success: "Login successful",
-    user: userExists.user,
-  });
-
   try {
+    const userExists = await userServices.userExists(loginData.phone_number);
+
+    if (userExists.error === "User found but not verified") {
+      res.status(409).json({ error: "User found but not verified" });
+      return;
+    }
+
+    if (userExists.error === "Error checking user existence") {
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+
+    if (!userExists.exists) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const checkPin = await verifyPin(
+      loginData.pin,
+      String(userExists.user?.pin)
+    );
+
+    if (!checkPin) {
+      res.status(401).json({ error: "Incorrect password" });
+      return;
+    }
+
+    res.status(200).json({
+      success: "Login successful",
+      user: userExists.user,
+    });
   } catch (error) {
     console.error("Error in user login", error);
     res.status(500).json({ error: "Error logging user in" });
+    return;
+  }
+};
+
+export const signInUser = async (req: Request, res: Response) => {
+  try {
+    const signInData: SignInData = req.body;
+
+    const userExists = await userServices.userExists(signInData.phone_number);
+
+    if (userExists.error === "User found but not verified") {
+      res.status(409).json({ error: "User found but not verified" });
+      return;
+    }
+
+    if (userExists.error === "Error checking user existence") {
+      res.status(500).json({ error: "Internal server error" });
+      return;
+    }
+
+    if (!userExists.exists) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const checkPin = await verifyPin(
+      signInData.pin,
+      String(userExists.user?.pin)
+    );
+
+    if (!checkPin) {
+      res.status(401).json({ error: "Incorrect password" });
+      return;
+    }
+
+    const otp = generateOtp();
+
+    await storeOtp(String(userExists.user?.id), otp);
+
+    res.status(200).json({
+      success: "Login successful",
+      user: userExists.user,
+      otp,
+    });
+  } catch (error) {
+    console.error("Error signing user in ", error);
+    res.status(500).json({ error: "Error - user sign in" });
     return;
   }
 };

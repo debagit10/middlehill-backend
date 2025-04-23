@@ -1,13 +1,15 @@
 import { Router } from "express";
 import {
   loginUser,
+  signInUser,
   signUpUser,
-  verifySignUp,
+  verify,
 } from "../controllers/userControllers";
 
 export const userRouter = Router();
 
 userRouter.post("/signup", signUpUser);
 userRouter.post("/login", loginUser);
+userRouter.post("/signin", signInUser);
 
-userRouter.patch("/verify-signup", verifySignUp);
+userRouter.patch("/verify-signup", verify);
