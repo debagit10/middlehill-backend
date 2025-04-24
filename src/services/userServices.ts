@@ -36,7 +36,7 @@ const userExists = async (phone_number: string) => {
   }
 };
 
-export const addUser = async (data: SignUpData) => {
+const addUser = async (data: SignUpData) => {
   try {
     const newUser = await User.create({
       ...data,
