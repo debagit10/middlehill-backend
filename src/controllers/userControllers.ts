@@ -36,8 +36,6 @@ export const signUpUser = async (req: Request, res: Response) => {
       return;
     }
 
-    const user_id = String(userCheck.user?.id);
-
     if (userCheck.error === "User found but not verified") {
       const otp = generateOtp();
 
