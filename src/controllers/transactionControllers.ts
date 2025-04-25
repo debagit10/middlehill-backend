@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 
 interface TransactionData {
   item_name: string;
-  quantity: number;
+  quantity: string;
   amount: number;
 }
 

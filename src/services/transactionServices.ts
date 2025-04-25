@@ -3,7 +3,7 @@ import { Transaction } from "../models/transactionModel";
 interface TransactionData {
   user_id: string;
   item_name: string;
-  quantity: number;
+  quantity: string;
   amount: number;
 }
 

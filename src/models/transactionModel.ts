@@ -5,7 +5,7 @@ interface TransactionAttributes {
   id: string;
   user_id: string;
   item_name: string;
-  quantity: number;
+  quantity: string;
   amount: number;
   deleted: boolean;
 }
@@ -21,8 +21,8 @@ const Transaction = sequelize.define<
     id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4 },
     user_id: { type: DataTypes.STRING, allowNull: false },
     item_name: { type: DataTypes.STRING, allowNull: false },
-    quantity: { type: DataTypes.NUMBER, allowNull: false },
-    amount: { type: DataTypes.NUMBER, allowNull: false },
+    quantity: { type: DataTypes.STRING, allowNull: false },
+    amount: { type: DataTypes.INTEGER, allowNull: false },
     deleted: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
   },
   {

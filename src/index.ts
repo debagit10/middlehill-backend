@@ -4,6 +4,7 @@ import cors from "cors";
 import { connectDB } from "./config/database_config";
 
 import { userRouter } from "./routes/userRoutes";
+import { transactionRouter } from "./routes/transactionRoutes";
 
 dotenv.config();
 const app = express();
@@ -12,11 +13,12 @@ const PORT = process.env.PORT;
 app.use(cors());
 app.use(express.json());
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (res: Response) => {
   res.status(200).send("Middle Hill backend server live");
 });
 
 app.use("/api/user", userRouter);
+app.use("/api/transaction", transactionRouter);
 
 const startServer = async () => {
   await connectDB();
