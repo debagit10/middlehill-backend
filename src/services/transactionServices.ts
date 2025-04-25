@@ -25,39 +25,39 @@ const userTransactions = async (user_id: string) => {
   try {
     const transactions = await Transaction.findAll({ where: { user_id } });
 
-    if (!transactions) {
+    if (transactions.length === 0) {
       return { error: "No transactions found" };
     }
 
-    return { success: "transaction found", data: transactions };
+    return { success: "Transactions retrieved", data: transactions };
   } catch (error) {
     console.log("Error in get user transactions", error);
     return { error: "Error getting user transactions" };
   }
 };
 
-const deleteTransaction = async (trancation_id: string) => {
+const deleteTransaction = async (transaction_id: string) => {
   try {
-    const deleteTransaction = await Transaction.update(
+    const result = await Transaction.update(
       { deleted: true },
-      { where: { id: trancation_id } }
+      { where: { id: transaction_id } }
     );
 
-    if (deleteTransaction[0] !== 0) {
+    if (result[0] === 0) {
       return { error: "Failed to delete transaction." };
     }
 
     return { success: "Transaction deleted successfully" };
   } catch (error) {
     console.log("Error in delete transaction service", error);
-    return { error: "Error adding transaction" };
+    return { error: "Error deleting transaction" };
   }
 };
 
 const checkTransaction = async (transaction_id: string) => {
   try {
     const transaction = await Transaction.findOne({
-      where: { id: transaction_id },
+      where: { id: transaction_id, deleted: false },
     });
 
     if (!transaction) {
