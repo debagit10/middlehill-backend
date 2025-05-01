@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { userServices } from "../services/userServices";
-import { generateOtp, storeOtp } from "../utils/otp";
+import { generateOtp, storeOtp, verifyOtp } from "../utils/otp";
 import { verifyPin } from "../utils/pin";
 
 interface SignUpData {
@@ -23,6 +23,24 @@ interface LoginData {
 interface SignInData {
   phone_number: string;
   pin: string;
+}
+
+interface EditProfileData_1 {
+  pin: string;
+  hashedPin: string;
+}
+
+interface EditProfileData_2 {
+  first_name: string;
+  last_name: string;
+  phone_number: string;
+  otp_code: string;
+}
+
+interface ChangePinData {
+  curPin: string;
+  hashedPin: string;
+  newPin: string;
 }
 
 export const signUpUser = async (req: Request, res: Response) => {
@@ -197,6 +215,96 @@ export const signInUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error signing user in ", error);
     res.status(500).json({ error: "Error - user sign in" });
+    return;
+  }
+};
+
+export const editProfile = async (req: Request, res: Response) => {
+  const newData: EditProfileData_1 = req.body;
+  const { user_id } = req.params;
+
+  try {
+    const checkPin = await verifyPin(newData.pin, newData.hashedPin);
+
+    if (!checkPin) {
+      res.status(500).json({ error: "Incorrect password" });
+      return;
+    }
+
+    const otp = generateOtp();
+    await storeOtp(user_id, otp);
+
+    res.status(200).json({ success: "Details saved", otp });
+  } catch (error) {
+    console.error("Error editting user profile ", error);
+    res.status(500).json({ error: "Error - edit user profile" });
+    return;
+  }
+};
+
+export const verifyProfileEdit = async (req: Request, res: Response) => {
+  const editData: EditProfileData_2 = req.body;
+  const { user_id } = req.params;
+
+  try {
+    const verify = await verifyOtp(user_id, editData.otp_code);
+
+    if (verify.error) {
+      res.status(500).json({ error: verify.error });
+      return;
+    }
+
+    const editUser = await userServices.editUser(user_id, editData);
+
+    if (editUser.error) {
+      res.status(500).json({ error: editUser.error });
+      return;
+    }
+
+    res.status(200).json({ success: editUser.success });
+  } catch (error) {
+    console.error("Error verifying user profile edit", error);
+    res.status(500).json({ error: "Error - user account edit" });
+    return;
+  }
+};
+
+export const deleteUserAccount = async (req: Request, res: Response) => {
+  const { user_id } = req.params;
+
+  try {
+    const response = await userServices.deleteAccount(user_id);
+
+    if (response.error == "Failed to delete account") {
+      res.status(500).json({ error: response.error });
+      return;
+    }
+
+    res.status(200).json({ success: response.success });
+  } catch (error) {
+    console.error("Error deleting account", error);
+    res.status(500).json({ error: "Error - delete user account" });
+    return;
+  }
+};
+
+export const changeUserPin = async (req: Request, res: Response) => {
+  const changePinData: ChangePinData = req.body;
+
+  const { user_id } = req.params;
+
+  try {
+    const response = await userServices.changePin(user_id, changePinData);
+
+    if (response.error) {
+      res.status(500).json({ error: response.error });
+      return;
+    }
+
+    res.status(200).json({ success: response.success });
+  } catch (error) {
+    console.error("Error changing pin", error);
+    res.status(500).json({ error: "Error - changing user pin" });
     return;
   }
 };
