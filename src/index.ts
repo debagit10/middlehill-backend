@@ -1,10 +1,11 @@
 import dotenv from "dotenv";
-import express, { Request, Response } from "express";
+import express, { Response } from "express";
 import cors from "cors";
 import { connectDB } from "./config/database_config";
 
 import { userRouter } from "./routes/userRoutes";
 import { transactionRouter } from "./routes/transactionRoutes";
+import { resendOtp } from "./utils/resendOtp";
 
 dotenv.config();
 const app = express();
@@ -19,6 +20,8 @@ app.get("/", (res: Response) => {
 
 app.use("/api/user", userRouter);
 app.use("/api/transaction", transactionRouter);
+
+app.post("/api/otp/resend/:user_id", resendOtp);
 
 const startServer = async () => {
   await connectDB();
