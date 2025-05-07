@@ -1,7 +1,7 @@
 import otpGenerator from "otp-generator";
 import { OTP } from "../models/otpModel";
 
-export const generateOtp = () => {
+const generateOtp = () => {
   const otp = otpGenerator.generate(6, {
     digits: true,
     upperCaseAlphabets: false,
@@ -12,14 +12,14 @@ export const generateOtp = () => {
   return otp;
 };
 
-export const storeOtp = async (user_id: string, otp_code: string) => {
+const storeOtp = async (user_id: string, otp_code: string) => {
   const expiresIn = 5 * 60 * 1000; // OTP expires in 5 minutes
   const expiresAt = new Date(Date.now() + expiresIn);
 
   await OTP.create({ user_id, otp_code, expiresAt });
 };
 
-export const verifyOtp = async (user_id: string, otp_code: string) => {
+const verifyOtp = async (user_id: string, otp_code: string) => {
   const otpEntry = await OTP.findOne({
     where: { user_id, otp_code },
   });
@@ -38,3 +38,5 @@ export const verifyOtp = async (user_id: string, otp_code: string) => {
 
   return { success: "Account verified" };
 };
+
+export const otpServices = { generateOtp, storeOtp, verifyOtp };

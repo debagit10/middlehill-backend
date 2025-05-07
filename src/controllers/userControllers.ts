@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { userServices } from "../services/userServices";
-import { generateOtp, storeOtp, verifyOtp } from "../utils/otp";
+import { otpServices } from "../utils/otp";
 import { verifyPin } from "../utils/pin";
 
 interface SignUpData {
@@ -55,9 +55,9 @@ export const signUpUser = async (req: Request, res: Response) => {
     }
 
     if (userCheck.error === "User found but not verified") {
-      const otp = generateOtp();
+      const otp = otpServices.generateOtp();
 
-      await storeOtp(String(userCheck.user?.id), otp);
+      await otpServices.storeOtp(String(userCheck.user?.id), otp);
 
       res.status(201).json({
         success: "User signed up successfully",
@@ -80,9 +80,9 @@ export const signUpUser = async (req: Request, res: Response) => {
     });
 
     if (response.success) {
-      const otp = generateOtp();
+      const otp = otpServices.generateOtp();
 
-      await storeOtp(response.data.dataValues.id, otp);
+      await otpServices.storeOtp(response.data.dataValues.id, otp);
 
       res.status(201).json({
         success: "User signed up successfully",
@@ -203,9 +203,9 @@ export const signInUser = async (req: Request, res: Response) => {
       return;
     }
 
-    const otp = generateOtp();
+    const otp = otpServices.generateOtp();
 
-    await storeOtp(String(userExists.user?.id), otp);
+    await otpServices.storeOtp(String(userExists.user?.id), otp);
 
     res.status(200).json({
       success: "Login successful",
@@ -231,8 +231,8 @@ export const editProfile = async (req: Request, res: Response) => {
       return;
     }
 
-    const otp = generateOtp();
-    await storeOtp(user_id, otp);
+    const otp = otpServices.generateOtp();
+    await otpServices.storeOtp(user_id, otp);
 
     res.status(200).json({ success: "Details saved", otp });
   } catch (error) {
@@ -247,7 +247,7 @@ export const verifyProfileEdit = async (req: Request, res: Response) => {
   const { user_id } = req.params;
 
   try {
-    const verify = await verifyOtp(user_id, editData.otp_code);
+    const verify = await otpServices.verifyOtp(user_id, editData.otp_code);
 
     if (verify.error) {
       res.status(500).json({ error: verify.error });

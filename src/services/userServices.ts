@@ -1,5 +1,5 @@
 import { User } from "../models/userModel";
-import { verifyOtp } from "../utils/otp";
+import { otpServices } from "../utils/otp";
 import { hashPin, verifyPin } from "../utils/pin";
 
 interface SignUpData {
@@ -65,7 +65,7 @@ const addUser = async (data: SignUpData) => {
 
 const verifyUser = async (otp: string, phone_number: string) => {
   try {
-    const verify = await verifyOtp(phone_number, otp);
+    const verify = await otpServices.verifyOtp(phone_number, otp);
 
     if (verify.success) {
       const response = await User.update(

@@ -5,7 +5,9 @@
   "scripts": {
     "build": "tsc --project tsconfig.prod.json",
     "start:dev": "nodemon --project tsconfig.dev.json",
-    "start:prod": "ts-node dist/index.js"
+    "start:prod": "ts-node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "keywords": [],
   "author": "debacodes",
@@ -13,9 +15,14 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.14.1",
     "@types/otp-generator": "^4.0.2",
+    "@types/supertest": "^6.0.3",
+    "jest": "^29.7.0",
     "nodemon": "^3.1.9",
+    "supertest": "^7.1.0",
+    "ts-jest": "^29.3.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
