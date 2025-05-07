@@ -21,3 +21,5 @@ export const verifyPin = async (
     throw new Error("Failed to verify password.");
   }
 };
+
+export const pinServices = { hashPin, verifyPin };
