@@ -44,7 +44,6 @@ interface EditProfileData_2 {
 
 interface ChangePinData {
   curPin: string;
-  hashedPin: string;
   newPin: string;
 }
 

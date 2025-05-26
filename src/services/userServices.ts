@@ -20,7 +20,6 @@ interface EditUserData {
 interface EditPinData {
   curPin: string;
   newPin: string;
-  hashedPin: string;
 }
 
 const userExists = async (phone_number: string) => {
@@ -126,7 +125,16 @@ const deleteAccount = async (user_id: string) => {
 
 const changePin = async (user_id: string, editPinData: EditPinData) => {
   try {
-    const checkPin = await verifyPin(editPinData.curPin, editPinData.hashedPin);
+    const user = await User.findOne({
+      where: { id: user_id, deleted: false, suspended: false },
+      attributes: ["pin"],
+    });
+
+    if (!user) {
+      return { error: "User not found or account is suspended/deleted" };
+    }
+
+    const checkPin = await verifyPin(editPinData.curPin, user.dataValues.pin);
 
     if (!checkPin) {
       return { error: "Incorrect current pin" };

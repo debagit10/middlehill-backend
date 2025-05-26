@@ -34,7 +34,7 @@ export const authUser = async (
     }
 
     //req.user = payload.decode;
-    res.locals.user_id = payload.user_id;
+    res.locals.user_id = payload.userId;
 
     next(); // Proceed to the next middleware
   } catch (error) {
