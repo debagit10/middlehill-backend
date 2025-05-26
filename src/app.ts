@@ -6,6 +6,7 @@ import { transactionRouter } from "./routes/transactionRoutes";
 import { adminRouter } from "./routes/adminRoutes";
 import { resendOtp } from "./utils/resendOtp";
 import { Request, Response } from "express";
+import { refreshToken } from "./utils/refreshToken";
 
 dotenv.config();
 
@@ -21,6 +22,8 @@ app.get("/", (_req: Request, res: Response) => {
 app.use("/api/user", userRouter);
 app.use("/api/transaction", transactionRouter);
 app.use("/api/admin", adminRouter);
+
 app.post("/api/otp/resend/:user_id", resendOtp);
+app.post("/api/refreshToken", refreshToken);
 
 export default app;

@@ -125,7 +125,7 @@ export const verify = async (req: Request, res: Response) => {
       userId: verifyData.id,
     });
 
-    const refreshToken = generateRefreshToken({
+    const refreshToken = await generateRefreshToken({
       userId: verifyData.id,
     });
 
@@ -179,7 +179,7 @@ export const loginUser = async (req: Request, res: Response) => {
       userId: String(userExists.user?.id),
     });
 
-    const refreshToken = generateRefreshToken({
+    const refreshToken = await generateRefreshToken({
       userId: String(userExists.user?.id),
     });
 

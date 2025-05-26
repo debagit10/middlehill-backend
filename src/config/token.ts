@@ -1,6 +1,7 @@
 import jwt, { SignOptions } from "jsonwebtoken";
 import CryptoJS from "crypto-js";
 import dotenv from "dotenv";
+import { Token } from "../models/tokenModel";
 
 dotenv.config();
 
@@ -27,7 +28,7 @@ const generateAccessToken = (payload: TokenPayload) => {
   return jwt.sign(payload, secret, options);
 };
 
-const generateRefreshToken = (payload: TokenPayload) => {
+const generateRefreshToken = async (payload: TokenPayload) => {
   const secret = process.env.JWT_REFRESH_SECRET;
   const expiresIn = process.env.REFRESH_TOKEN_EXPIRY;
 
@@ -42,7 +43,14 @@ const generateRefreshToken = (payload: TokenPayload) => {
     );
   }
 
-  return jwt.sign(payload, secret, options);
+  const token = jwt.sign(payload, secret, options);
+
+  await Token.create({
+    user_id: payload.userId,
+    token: token,
+  });
+
+  return token;
 };
 
 const encryptToken = (token: string) => {
