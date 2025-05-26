@@ -1,9 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { connectDB } from "./config/database_config";
 import { userRouter } from "./routes/userRoutes";
 import { transactionRouter } from "./routes/transactionRoutes";
+import { adminRouter } from "./routes/adminRoutes";
 import { resendOtp } from "./utils/resendOtp";
 import { Request, Response } from "express";
 
@@ -20,6 +20,7 @@ app.get("/", (_req: Request, res: Response) => {
 
 app.use("/api/user", userRouter);
 app.use("/api/transaction", transactionRouter);
+app.use("/api/admin", adminRouter);
 app.post("/api/otp/resend/:user_id", resendOtp);
 
 export default app;
