@@ -254,7 +254,9 @@ export const signInUser = async (req: Request, res: Response) => {
 
 export const editProfile = async (req: Request, res: Response) => {
   const newData: EditProfileData_1 = req.body;
-  const { user_id } = req.params;
+  // const { user_id } = req.params;
+
+  const user_id = res.locals.user_id;
 
   try {
     const checkPin = await verifyPin(newData.pin, newData.hashedPin);
@@ -277,7 +279,9 @@ export const editProfile = async (req: Request, res: Response) => {
 
 export const verifyProfileEdit = async (req: Request, res: Response) => {
   const editData: EditProfileData_2 = req.body;
-  const { user_id } = req.params;
+  // const { user_id } = req.params;
+
+  const user_id = res.locals.user_id;
 
   try {
     const verify = await otpServices.verifyOtp(user_id, editData.otp_code);
@@ -303,7 +307,9 @@ export const verifyProfileEdit = async (req: Request, res: Response) => {
 };
 
 export const deleteUserAccount = async (req: Request, res: Response) => {
-  const { user_id } = req.params;
+  // const { user_id } = req.params;
+
+  const user_id = res.locals.user_id;
 
   try {
     const response = await userServices.deleteAccount(user_id);
@@ -324,7 +330,9 @@ export const deleteUserAccount = async (req: Request, res: Response) => {
 export const changeUserPin = async (req: Request, res: Response) => {
   const changePinData: ChangePinData = req.body;
 
-  const { user_id } = req.params;
+  const user_id = res.locals.user_id;
+
+  //const { user_id } = req.params;
 
   try {
     const response = await userServices.changePin(user_id, changePinData);
