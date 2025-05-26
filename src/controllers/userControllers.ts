@@ -2,6 +2,11 @@ import { Request, Response } from "express";
 import { userServices } from "../services/userServices";
 import { otpServices } from "../utils/otp";
 import { verifyPin } from "../utils/pin";
+import {
+  encryptToken,
+  generateAccessToken,
+  generateRefreshToken,
+} from "../config/token";
 
 interface SignUpData {
   first_name: string;
@@ -117,9 +122,19 @@ export const verify = async (req: Request, res: Response) => {
       return;
     }
 
+    const accessToken = generateAccessToken({
+      userId: verifyData.id,
+    });
+
+    const refreshToken = generateRefreshToken({
+      userId: verifyData.id,
+    });
+
     res.status(200).json({
       success: "User successfully verified",
       message: verified?.success,
+      accessToken: encryptToken(accessToken),
+      refreshToken: encryptToken(refreshToken),
     });
 
     return;
@@ -161,9 +176,19 @@ export const loginUser = async (req: Request, res: Response) => {
       return;
     }
 
+    const accessToken = generateAccessToken({
+      userId: String(userExists.user?.id),
+    });
+
+    const refreshToken = generateRefreshToken({
+      userId: String(userExists.user?.id),
+    });
+
     res.status(200).json({
       success: "Login successful",
       user: userExists.user,
+      accessToken: encryptToken(accessToken),
+      refreshToken: encryptToken(refreshToken),
     });
   } catch (error) {
     console.error("Error in user login", error);
@@ -206,6 +231,14 @@ export const signInUser = async (req: Request, res: Response) => {
     const otp = otpServices.generateOtp();
 
     await otpServices.storeOtp(String(userExists.user?.id), otp);
+
+    const accessToken = generateAccessToken({
+      userId: String(userExists.user?.id),
+    });
+
+    const refreshToken = generateRefreshToken({
+      userId: String(userExists.user?.id),
+    });
 
     res.status(200).json({
       success: "Login successful",
