@@ -9,7 +9,7 @@ interface TransactionData {
 
 export const addTransaction = async (req: Request, res: Response) => {
   const transactionData: TransactionData = req.body;
-  const { user_id } = req.params;
+  const user_id = res.locals.user_id;
 
   try {
     const response = await transactionServices.addTransaction({
@@ -30,7 +30,7 @@ export const addTransaction = async (req: Request, res: Response) => {
 };
 
 export const getTransactions = async (req: Request, res: Response) => {
-  const { user_id } = req.params;
+  const user_id = res.locals.user_id;
 
   try {
     const response = await transactionServices.userTransactions(user_id);

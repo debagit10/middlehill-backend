@@ -4,11 +4,16 @@ import {
   deleteTransaction,
   getTransactions,
 } from "../controllers/transactionControllers";
+import { authUser } from "../middlewares/authorize";
 
 export const transactionRouter = Router();
 
-transactionRouter.post("/add/:user_id", addTransaction);
+transactionRouter.post("/add", authUser, addTransaction);
 
-transactionRouter.get("/get/:user_id", getTransactions);
+transactionRouter.get("/get", authUser, getTransactions);
 
-transactionRouter.delete("/delete/:transaction_id", deleteTransaction);
+transactionRouter.delete(
+  "/delete/:transaction_id",
+  authUser,
+  deleteTransaction
+);
