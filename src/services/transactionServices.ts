@@ -30,7 +30,10 @@ const addTransaction = async (
 
 const userTransactions = async (user_id: string) => {
   try {
-    const transactions = await Transaction.findAll({ where: { user_id } });
+    const transactions = await Transaction.findAll({
+      where: { user_id, deleted: false },
+      order: [["createdAt", "DESC"]],
+    });
 
     if (transactions.length === 0) {
       return { error: "No transactions found" };
@@ -78,9 +81,32 @@ const checkTransaction = async (transaction_id: string) => {
   }
 };
 
+const allTransaction = async () => {
+  try {
+    const transactions = await Transaction.findAll({
+      where: { deleted: false },
+      order: [["createdAt", "DESC"]],
+    });
+
+    if (!transactions.length) {
+      return { error: "No transactions found.", transactions: null };
+    }
+
+    return {
+      success: "transactions retrieved",
+      transactions,
+      count: transactions.length,
+    };
+  } catch (error) {
+    console.log("Error in getting transaction service", error);
+    return { error: "Error getting transactions" };
+  }
+};
+
 export const transactionServices = {
   addTransaction,
   userTransactions,
   deleteTransaction,
   checkTransaction,
+  allTransaction,
 };

@@ -79,3 +79,21 @@ export const deleteTransaction = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to delete transaction" });
   }
 };
+
+export const allTransactions = async (req: Request, res: Response) => {
+  try {
+    const response = await transactionServices.allTransaction();
+
+    if (response.transactions == null) {
+      res.status(404).json(response);
+      return;
+    }
+
+    res.status(200).json(response);
+    return;
+  } catch (error) {
+    console.log("Error in get transactions controller", error);
+    res.status(500).json({ error: "Failed to get transactions" });
+    return;
+  }
+};

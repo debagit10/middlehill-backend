@@ -2,7 +2,7 @@ import otpGenerator from "otp-generator";
 import { OTP } from "../models/otpModel";
 
 const generateOtp = () => {
-  const otp = otpGenerator.generate(6, {
+  const otp = otpGenerator.generate(4, {
     digits: true,
     upperCaseAlphabets: false,
     specialChars: false,
