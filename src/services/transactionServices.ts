@@ -1,20 +1,27 @@
 import { Transaction } from "../models/transactionModel";
 
 interface TransactionData {
-  user_id: string;
   item_name: string;
   quantity: string;
   amount: number;
 }
 
-const addTransaction = async (data: TransactionData) => {
+const addTransaction = async (
+  data: TransactionData | TransactionData[],
+  user_id: string
+) => {
   try {
-    const newTransaction = await Transaction.create({
-      ...data,
-      deleted: false,
-    });
+    const transactions = Array.isArray(data) ? data : [data];
 
-    return { success: true, data: newTransaction };
+    const newTransactions = await Transaction.bulkCreate(
+      transactions.map((txn) => ({
+        ...txn,
+        user_id,
+        deleted: false,
+      }))
+    );
+
+    return { success: true, data: newTransactions };
   } catch (error) {
     console.log("Error in adding transaction service", error);
     return { error: "Error adding transaction" };
