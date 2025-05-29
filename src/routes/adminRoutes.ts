@@ -9,17 +9,39 @@ import {
   reinstateAdmin,
   suspendAdmin,
 } from "../controllers/adminControllers";
+import { authorizeAdmin } from "../middlewares/authenticate";
+import { authAdmin } from "../middlewares/authorize";
 
 export const adminRouter = Router();
 
 adminRouter.post("/add", addAdmin);
 adminRouter.post("/login", loginAdmin);
 
-adminRouter.get("/getAll", getAllAdmins);
+adminRouter.get("/getAll", authAdmin, authorizeAdmin("admin"), getAllAdmins);
 
-adminRouter.put("/edit/:admin_id", editAdmin);
-adminRouter.put("/change-password/:admin_id", changeAdminPassword);
-adminRouter.put("/suspend/:admin_id", suspendAdmin);
-adminRouter.put("/reinstate/:admin_id", reinstateAdmin);
+adminRouter.put(
+  "/edit/:admin_id",
+  authAdmin,
+  authorizeAdmin("admin"),
+  editAdmin
+);
+adminRouter.put("/change-password/:admin_id", authAdmin, changeAdminPassword);
+adminRouter.put(
+  "/suspend/:admin_id",
+  authAdmin,
+  authorizeAdmin("admin"),
+  suspendAdmin
+);
+adminRouter.put(
+  "/reinstate/:admin_id",
+  authAdmin,
+  authorizeAdmin("admin"),
+  reinstateAdmin
+);
 
-adminRouter.delete("/delete/:admin_id", deleteAdmin);
+adminRouter.delete(
+  "/delete/:admin_id",
+  authAdmin,
+  authorizeAdmin("admin"),
+  deleteAdmin
+);

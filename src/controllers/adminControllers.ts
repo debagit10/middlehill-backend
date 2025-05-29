@@ -2,6 +2,11 @@ import { adminServices } from "../services/adminServices";
 import { Request, Response } from "express";
 import { admin_mgt_Services } from "../services/admin_mgt_Services";
 import { verifyPin } from "../utils/pin";
+import {
+  encryptToken,
+  generateAccessToken,
+  generateRefreshToken,
+} from "../config/token";
 
 interface AdminData {
   name: string;
@@ -79,7 +84,22 @@ export const loginAdmin = async (req: Request, res: Response) => {
       return;
     }
 
-    res.status(200).json({ message: "Login successful", admin });
+    const accessToken = generateAccessToken({
+      userId: String(admin?.id),
+      role: admin?.role,
+    });
+
+    const refreshToken = await generateRefreshToken({
+      userId: String(admin?.id),
+      role: admin?.role,
+    });
+
+    res.status(200).json({
+      message: "Login successful",
+      admin,
+      accessToken: encryptToken(accessToken),
+      refreshToken: encryptToken(refreshToken),
+    });
     return;
   } catch (error) {
     console.error("Error in loginAdmin controller", error);
