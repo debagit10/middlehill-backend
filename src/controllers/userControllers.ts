@@ -58,6 +58,10 @@ export const signUpUser = async (req: Request, res: Response) => {
       return;
     }
 
+    if (userCheck.suspended) {
+      res.status(403).json({ error: "Account suspended" });
+    }
+
     if (userCheck.error === "User found but not verified") {
       const otp = otpServices.generateOtp();
 
@@ -150,8 +154,12 @@ export const loginUser = async (req: Request, res: Response) => {
   try {
     const userExists = await userServices.userExists(loginData.phone_number);
 
+    if (userExists.suspended) {
+      res.status(403).json({ error: "Account suspended" });
+    }
+
     if (userExists.error === "User found but not verified") {
-      res.status(409).json({ error: "User found but not verified" });
+      res.status(403).json({ error: "User found but not verified" });
       return;
     }
 
@@ -201,6 +209,10 @@ export const signInUser = async (req: Request, res: Response) => {
     const signInData: SignInData = req.body;
 
     const userExists = await userServices.userExists(signInData.phone_number);
+
+    if (userExists.suspended) {
+      res.status(403).json({ error: "Account suspended" });
+    }
 
     if (userExists.error === "User found but not verified") {
       res.status(409).json({ error: "User found but not verified" });

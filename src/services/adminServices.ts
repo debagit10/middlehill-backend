@@ -20,16 +20,16 @@ const adminExists = async (email?: string, admin_id?: string) => {
 
     const admin = await Admin.findOne({
       where: {
-        [Op.and]: [
-          { [Op.or]: orConditions },
-          { deleted: false },
-          { suspended: false },
-        ],
+        [Op.and]: [{ [Op.or]: orConditions }, { deleted: false }],
       },
     });
 
     if (!admin) {
       return { exists: false };
+    }
+
+    if (admin.dataValues.suspended) {
+      return { suspended: true };
     }
 
     return {

@@ -29,11 +29,17 @@ export const addAdmin = async (req: Request, res: Response) => {
   try {
     const adminData: AdminData = req.body;
 
-    const adminCheck = await adminServices.adminExists(adminData.email);
+    const { exists, suspended } = await adminServices.adminExists(
+      adminData.email
+    );
 
-    if (adminCheck.exists) {
+    if (!exists) {
       res.status(409).json({ error: "Admin already exists" });
       return;
+    }
+
+    if (suspended) {
+      res.status(403).json({ error: "Account suspended" });
     }
 
     const { success, error, data } = await adminServices.addAdmin({
@@ -60,13 +66,17 @@ export const loginAdmin = async (req: Request, res: Response) => {
   try {
     const adminData: LoginData = req.body;
 
-    const { exists, error, admin } = await adminServices.adminExists(
+    const { exists, error, admin, suspended } = await adminServices.adminExists(
       adminData.email
     );
 
     if (!exists) {
       res.status(404).json({ error: "Admin not found" });
       return;
+    }
+
+    if (suspended) {
+      res.status(403).json({ error: "Account suspended" });
     }
 
     if (error) {
@@ -151,11 +161,17 @@ export const changeAdminPassword = async (req: Request, res: Response) => {
     const { admin_id } = req.params;
     const passwordData: EditPasswordData = req.body;
 
-    const { exists, admin } = await adminServices.adminExists(admin_id);
+    const { exists, admin, suspended } = await adminServices.adminExists(
+      admin_id
+    );
 
     if (!exists) {
       res.status(404).json({ error: "Admin not found" });
       return;
+    }
+
+    if (suspended) {
+      res.status(403).json({ error: "Account suspended" });
     }
 
     if (!admin || !admin.password) {

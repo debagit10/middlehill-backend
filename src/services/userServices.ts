@@ -25,11 +25,15 @@ interface EditPinData {
 const userExists = async (phone_number: string) => {
   try {
     const user = await User.findOne({
-      where: { phone_number, deleted: false, suspended: false },
+      where: { phone_number, deleted: false },
     });
 
     if (!user) {
       return { exists: false };
+    }
+
+    if (user.dataValues.suspended) {
+      return { suspended: true };
     }
 
     if (user.dataValues.verified) {
