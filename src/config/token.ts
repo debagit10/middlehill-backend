@@ -80,7 +80,9 @@ const decryptToken = (encryptedToken: string): string | null => {
     return null;
   }
   try {
-    const bytes = CryptoJS.AES.decrypt(encryptedToken, secretKey);
+    const decodedToken = decodeURIComponent(encryptedToken);
+
+    const bytes = CryptoJS.AES.decrypt(decodedToken, secretKey);
     const decryptedToken = bytes.toString(CryptoJS.enc.Utf8);
 
     return decryptedToken || null;

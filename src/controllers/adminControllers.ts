@@ -7,6 +7,7 @@ import {
   generateAccessToken,
   generateRefreshToken,
 } from "../config/token";
+import { Token } from "../models/tokenModel";
 
 interface AdminData {
   name: string;
@@ -104,12 +105,26 @@ export const loginAdmin = async (req: Request, res: Response) => {
       role: admin?.role,
     });
 
+    if (admin?.id) {
+      await Token.create({
+        user_id: admin?.id,
+        token: refreshToken,
+      });
+    }
+
+    res.cookie("refreshToken", encryptToken(refreshToken), {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
     res.status(200).json({
       message: "Login successful",
       admin,
       accessToken: encryptToken(accessToken),
-      refreshToken: encryptToken(refreshToken),
     });
+
     return;
   } catch (error) {
     console.error("Error in loginAdmin controller", error);
