@@ -11,7 +11,9 @@ interface TokenPayload extends JwtPayload {
 }
 
 export const refreshToken = async (req: Request, res: Response) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies.refreshToken;
+
+  console.log({ refreshToken });
 
   const decryptedToken = String(decryptToken(refreshToken));
 
@@ -54,7 +56,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     res.cookie("refreshToken", encryptToken(newRefreshToken), {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });

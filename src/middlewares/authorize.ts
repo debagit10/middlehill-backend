@@ -63,23 +63,21 @@ export const authAdmin = async (
 
     const decryptedToken = decryptToken(token);
     if (!decryptedToken) {
-      res.status(401).json({ error: "Invalid token" });
+      res.status(401).json({ error: "Invalid token decryption" });
       return;
     }
 
-    const payload = jwt.verify(decryptedToken, process.env.JWT_SECRET!) as any;
-
-    if (!payload?.userId) {
+    const payload = jwt.verify(decryptedToken, process.env.JWT_SECRET!);
+    if (!payload || typeof payload !== "object" || !("userId" in payload)) {
       res.status(401).json({ error: "Token verification failed" });
       return;
     }
 
-    //req.user = payload.decode;
     res.locals.admin = payload;
-
-    next(); // Proceed to the next middleware
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ error: "Error authorizing user." });
+    next();
+  } catch (error: any) {
+    console.error("Auth error:", error.message || error);
+    res.status(401).json({ error: "Error authorizing user." });
+    return;
   }
 };

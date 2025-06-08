@@ -16,8 +16,6 @@ const adminExists = async (email?: string, admin_id?: string) => {
     if (email) orConditions.push({ email });
     if (admin_id) orConditions.push({ id: admin_id });
 
-    console.log(admin_id);
-
     const admin = await Admin.findOne({
       where: {
         [Op.and]: [{ [Op.or]: orConditions }, { deleted: false }],
@@ -75,13 +73,16 @@ const getAdmin = async (admin_id: string) => {
 
 const getAllAdmins = async () => {
   try {
-    const admins = await Admin.findAll();
+    const admins = await Admin.findAll({
+      attributes: ["name", "email", "role", "id", "suspended", "createdAt"],
+      order: [["createdAt", "DESC"]],
+    });
 
     if (admins.length === 0) {
       return { error: "No admins found" };
     }
 
-    return { success: "Admins retrieved", data: admins };
+    return { success: "Admins retrieved", admins };
   } catch (error) {
     console.log("Error in getting all admins", error);
     return { error: "Error getting all admins" };

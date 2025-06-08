@@ -16,7 +16,7 @@ const generateAccessToken = (payload: TokenPayload) => {
 
   const options: SignOptions = {
     algorithm: "HS256",
-    expiresIn: "15m", // Default expiration time
+    expiresIn: "1h", // Default expiration time
   };
 
   if (!secret || !expiresIn) {

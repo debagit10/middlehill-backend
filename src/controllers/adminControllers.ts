@@ -34,7 +34,7 @@ export const addAdmin = async (req: Request, res: Response) => {
       adminData.email
     );
 
-    if (!exists) {
+    if (exists) {
       res.status(409).json({ error: "Admin already exists" });
       return;
     }
@@ -114,7 +114,7 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
     res.cookie("refreshToken", encryptToken(refreshToken), {
       httpOnly: true,
-      secure: true,
+      secure: false,
       sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -135,14 +135,14 @@ export const loginAdmin = async (req: Request, res: Response) => {
 
 export const getAllAdmins = async (req: Request, res: Response) => {
   try {
-    const { success, error, data } = await adminServices.getAllAdmins();
+    const { success, error, admins } = await adminServices.getAllAdmins();
 
     if (error) {
       res.status(404).json({ error });
       return;
     }
 
-    res.status(200).json({ success, data });
+    res.status(200).json({ success, admins });
   } catch (error) {
     console.error("Error in getAllAdmins controller", error);
     res.status(500).json({ error: "Internal server error" });
@@ -154,10 +154,21 @@ export const editAdmin = async (req: Request, res: Response) => {
     const { admin_id } = req.params;
     const editData: AdminData = req.body;
 
+    if (editData.email) {
+      const { exists } = await adminServices.adminExists(editData.email);
+
+      if (exists) {
+        res.status(500).json({ error: "Email already exists" });
+        return;
+      }
+    }
+
     const { success, error } = await admin_mgt_Services.editAdmin(
       admin_id,
       editData
     );
+
+    console.log(admin_id);
 
     if (error) {
       res.status(404).json({ error });
