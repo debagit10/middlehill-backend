@@ -9,6 +9,7 @@ import { resendOtp } from "./utils/resendOtp";
 import { Request, Response } from "express";
 import { refreshToken } from "./utils/refreshToken";
 import { businessRouter } from "./routes/businessRoutes";
+import "./models/relationships";
 
 dotenv.config();
 
