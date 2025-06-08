@@ -16,10 +16,10 @@ interface TransactionCreationAttributes
 const Transaction = sequelize.define<
   Model<TransactionAttributes, TransactionCreationAttributes>
 >(
-  "user",
+  "transaction",
   {
     id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4 },
-    user_id: { type: DataTypes.STRING, allowNull: false },
+    user_id: { type: DataTypes.UUID, allowNull: false },
     item_name: { type: DataTypes.STRING, allowNull: false },
     quantity: { type: DataTypes.STRING, allowNull: false },
     amount: { type: DataTypes.INTEGER, allowNull: false },

@@ -9,6 +9,7 @@ interface UserProfileAttributes {
   bank_name: string;
   business_name: string;
   pic: string;
+  address: string;
 }
 
 interface UserProfileCreationAttributes
@@ -20,12 +21,13 @@ const User_Profile = sequelize.define<
   "user_profiles",
   {
     id: { type: DataTypes.UUID, primaryKey: true, defaultValue: UUIDV4 },
-    user_id: { type: DataTypes.STRING, allowNull: false },
+    user_id: { type: DataTypes.UUID, allowNull: false },
     email: { type: DataTypes.STRING, allowNull: false },
     bank_acc_no: { type: DataTypes.STRING, allowNull: false },
     bank_name: { type: DataTypes.STRING, allowNull: false },
-    business_name: { type: DataTypes.BOOLEAN, defaultValue: false },
+    business_name: { type: DataTypes.STRING, defaultValue: false },
     pic: { type: DataTypes.STRING, defaultValue: false },
+    address: { type: DataTypes.STRING, defaultValue: false },
   },
   {
     timestamps: true,

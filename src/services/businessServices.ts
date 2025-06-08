@@ -1,5 +1,6 @@
 import { Transaction } from "../models/transactionModel";
 import { User } from "../models/userModel";
+import { User_Profile } from "../models/userProfileModel";
 
 const businessList = async () => {
   try {
@@ -26,13 +27,27 @@ const businessList = async () => {
 const businessDetails = async (business_id: string) => {
   try {
     const details = await User.findOne({
-      where: { id: business_id, deleted: false, verified: true },
+      where: {
+        id: business_id,
+        deleted: false,
+        verified: true,
+      },
       attributes: [
         "id",
         "first_name",
         "last_name",
         "phone_number",
         "suspended",
+      ],
+      include: [
+        {
+          model: User_Profile,
+          attributes: { exclude: ["createdAt", "updatedAt", "id", "user_id"] },
+        },
+        {
+          model: Transaction,
+          attributes: { exclude: ["createdAt", "updatedAt", "user_id"] },
+        },
       ],
     });
 

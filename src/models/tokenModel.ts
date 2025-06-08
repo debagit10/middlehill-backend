@@ -11,7 +11,7 @@ interface TokenAttributes {
 interface TokenCreationAttributes extends Optional<TokenAttributes, "id"> {}
 
 const Token = sequelize.define<Model<TokenAttributes, TokenCreationAttributes>>(
-  "otp",
+  "token",
   {
     id: {
       type: DataTypes.UUID,
