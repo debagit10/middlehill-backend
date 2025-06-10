@@ -11,11 +11,5 @@ User_Profile.belongsTo(User, { foreignKey: "user_id" });
 User.hasMany(OTP, { foreignKey: "user_id", onDelete: "CASCADE" });
 OTP.belongsTo(User, { foreignKey: "user_id" });
 
-User.hasMany(Token, { foreignKey: "user_id", onDelete: "CASCADE" });
-Token.belongsTo(User, { foreignKey: "user_id" });
-
 User.hasMany(Transaction, { foreignKey: "user_id", onDelete: "CASCADE" });
 Transaction.belongsTo(User, { foreignKey: "user_id" });
-
-// Admin.hasMany(OTP, { foreignKey: "user_id", onDelete: "CASCADE" });
-// OTP.belongsTo(Admin, { foreignKey: "user_id" });

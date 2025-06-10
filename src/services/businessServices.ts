@@ -46,7 +46,7 @@ const businessDetails = async (business_id: string) => {
         },
         {
           model: Transaction,
-          attributes: { exclude: ["createdAt", "updatedAt", "user_id"] },
+          attributes: { exclude: ["updatedAt", "user_id"] },
         },
       ],
     });
