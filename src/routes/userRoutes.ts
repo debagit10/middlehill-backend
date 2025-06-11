@@ -8,6 +8,7 @@ import {
   editProfile,
   verifyProfileEdit,
   changeUserPin,
+  userDetails,
 } from "../controllers/userControllers";
 import { authUser } from "../middlewares/authorize";
 
@@ -16,6 +17,8 @@ export const userRouter = Router();
 userRouter.post("/signup", signUpUser);
 userRouter.post("/login", loginUser);
 userRouter.post("/signin", signInUser);
+
+userRouter.get("/details", authUser, userDetails);
 
 userRouter.patch("/verify-signup", verify);
 userRouter.patch("/delete-account", authUser, deleteUserAccount);

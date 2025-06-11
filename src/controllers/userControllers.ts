@@ -263,6 +263,26 @@ export const signInUser = async (req: Request, res: Response) => {
   }
 };
 
+export const userDetails = async (req: Request, res: Response) => {
+  const user_id = res.locals.user_id;
+
+  try {
+    const response = await userServices.getUser(user_id);
+
+    if (response.error === "User not found") {
+      res.status(404).json(response);
+      return;
+    }
+
+    res.status(200).json(response);
+    return;
+  } catch (error) {
+    console.error("Error getting user details ", error);
+    res.status(500).json({ error: "Error - get user details" });
+    return;
+  }
+};
+
 export const editProfile = async (req: Request, res: Response) => {
   const newData: EditProfileData_1 = req.body;
   // const { user_id } = req.params;

@@ -51,6 +51,21 @@ const userExists = async (phone_number: string) => {
   }
 };
 
+const getUser = async (user_id: string) => {
+  try {
+    const user = await User.findOne({ where: { id: user_id } });
+
+    if (!user) {
+      return { error: "User not found" };
+    }
+
+    return { success: "User found", user };
+  } catch (error) {
+    console.error("Error getting user details", error);
+    return { exists: false, error: "Error getting user details" };
+  }
+};
+
 const addUser = async (data: SignUpData) => {
   try {
     const newUser = await User.create({
@@ -167,4 +182,5 @@ export const userServices = {
   editUser,
   changePin,
   deleteAccount,
+  getUser,
 };
