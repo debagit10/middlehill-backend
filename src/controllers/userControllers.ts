@@ -43,7 +43,7 @@ interface EditProfileData_2 {
 }
 
 interface ChangePinData {
-  curPin: string;
+  otp_code: string;
   newPin: string;
 }
 
@@ -358,15 +358,45 @@ export const deleteUserAccount = async (req: Request, res: Response) => {
   }
 };
 
+export const confirmPin = async (req: Request, res: Response) => {
+  const { pin } = req.body;
+  const user_id = res.locals.user_id;
+
+  try {
+    const { error, success } = await userServices.checkPin(user_id, pin);
+
+    if (error) {
+      res.status(400).json({ error });
+      return;
+    }
+
+    const otp = otpServices.generateOtp();
+    await otpServices.storeOtp(user_id, otp);
+
+    res.status(200).json({ success, otp });
+  } catch (error) {
+    console.error("Error confirming pin", error);
+    res.status(500).json({ error: "Error - confriming pin" });
+  }
+};
+
 export const changeUserPin = async (req: Request, res: Response) => {
   const changePinData: ChangePinData = req.body;
 
   const user_id = res.locals.user_id;
 
-  //const { user_id } = req.params;
-
   try {
-    const response = await userServices.changePin(user_id, changePinData);
+    const verify = await otpServices.verifyOtp(user_id, changePinData.otp_code);
+
+    if (verify.error) {
+      res.status(500).json({ error: verify.error });
+      return;
+    }
+
+    const response = await userServices.changePin(
+      user_id,
+      changePinData.newPin
+    );
 
     if (response.error) {
       res.status(500).json({ error: response.error });

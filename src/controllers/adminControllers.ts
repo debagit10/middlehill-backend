@@ -149,6 +149,38 @@ export const getAllAdmins = async (req: Request, res: Response) => {
   }
 };
 
+export const updateAdmin = async (req: Request, res: Response) => {
+  const { admin_id } = req.params;
+
+  try {
+    const editData: AdminData = req.body;
+
+    if (editData.email) {
+      const { exists } = await adminServices.adminExists(editData.email);
+
+      if (exists) {
+        res.status(500).json({ error: "Email already exists" });
+        return;
+      }
+    }
+
+    const { success, error, admin } = await adminServices.updateAdmin(
+      admin_id,
+      editData
+    );
+
+    if (error) {
+      res.status(404).json({ error });
+      return;
+    }
+
+    res.status(200).json({ success, admin });
+  } catch (error) {
+    console.error("Error in update Admin controller", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 export const editAdmin = async (req: Request, res: Response) => {
   try {
     const { admin_id } = req.params;

@@ -17,11 +17,6 @@ interface EditUserData {
   phone_number: string;
 }
 
-interface EditPinData {
-  curPin: string;
-  newPin: string;
-}
-
 const userExists = async (phone_number: string) => {
   try {
     const user = await User.findOne({
@@ -142,7 +137,7 @@ const deleteAccount = async (user_id: string) => {
   }
 };
 
-const changePin = async (user_id: string, editPinData: EditPinData) => {
+const checkPin = async (user_id: string, pin: string) => {
   try {
     const user = await User.findOne({
       where: { id: user_id, deleted: false, suspended: false },
@@ -153,14 +148,23 @@ const changePin = async (user_id: string, editPinData: EditPinData) => {
       return { error: "User not found or account is suspended/deleted" };
     }
 
-    const checkPin = await verifyPin(editPinData.curPin, user.dataValues.pin);
+    const checkPin = await verifyPin(pin, user.dataValues.pin);
 
     if (!checkPin) {
       return { error: "Incorrect current pin" };
     }
 
+    return { success: "Pin verified successfully" };
+  } catch (error) {
+    console.error("Error verifying pin", error);
+    return { error: "Error verifying pin" };
+  }
+};
+
+const changePin = async (user_id: string, newPin: string) => {
+  try {
     const edit = await User.update(
-      { pin: await hashPin(editPinData.newPin) },
+      { pin: await hashPin(newPin) },
       { where: { id: user_id } }
     );
 
@@ -180,6 +184,7 @@ export const userServices = {
   addUser,
   userExists,
   editUser,
+  checkPin,
   changePin,
   deleteAccount,
   getUser,

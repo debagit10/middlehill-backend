@@ -74,6 +74,7 @@ const getAdmin = async (admin_id: string) => {
 const getAllAdmins = async () => {
   try {
     const admins = await Admin.findAll({
+      where: { deleted: false },
       attributes: ["name", "email", "role", "id", "suspended", "createdAt"],
       order: [["createdAt", "DESC"]],
     });
@@ -89,9 +90,35 @@ const getAllAdmins = async () => {
   }
 };
 
+const updateAdmin = async (admin_id: string, editData: AdminData) => {
+  try {
+    const update = await Admin.update(
+      { ...editData },
+      { where: { id: admin_id } }
+    );
+
+    if (update[0] === 0) {
+      return { error: "Failed to update admin profile" };
+    }
+
+    const updatedAdmin = await Admin.findOne({
+      where: { id: admin_id },
+    });
+
+    return {
+      success: "Admin profile updated successfully",
+      admin: updatedAdmin?.dataValues,
+    };
+  } catch (error) {
+    console.error(error);
+    return { error: "Error editting admin" };
+  }
+};
+
 export const adminServices = {
   adminExists,
   addAdmin,
   getAdmin,
   getAllAdmins,
+  updateAdmin,
 };

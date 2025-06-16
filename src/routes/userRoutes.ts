@@ -9,6 +9,7 @@ import {
   verifyProfileEdit,
   changeUserPin,
   userDetails,
+  confirmPin,
 } from "../controllers/userControllers";
 import { authUser } from "../middlewares/authorize";
 
@@ -17,6 +18,7 @@ export const userRouter = Router();
 userRouter.post("/signup", signUpUser);
 userRouter.post("/login", loginUser);
 userRouter.post("/signin", signInUser);
+userRouter.post("/check-pin", authUser, confirmPin);
 
 userRouter.get("/details", authUser, userDetails);
 
