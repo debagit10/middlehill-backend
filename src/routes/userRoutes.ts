@@ -10,6 +10,8 @@ import {
   changeUserPin,
   userDetails,
   confirmPin,
+  forgotPin,
+  otpVerification,
 } from "../controllers/userControllers";
 import { authUser } from "../middlewares/authorize";
 
@@ -18,6 +20,8 @@ export const userRouter = Router();
 userRouter.post("/signup", signUpUser);
 userRouter.post("/login", loginUser);
 userRouter.post("/signin", signInUser);
+userRouter.post("/forgot-pin", forgotPin);
+userRouter.post("/verify-otp", otpVerification);
 userRouter.post("/check-pin", authUser, confirmPin);
 
 userRouter.get("/details", authUser, userDetails);

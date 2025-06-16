@@ -410,3 +410,61 @@ export const changeUserPin = async (req: Request, res: Response) => {
     return;
   }
 };
+
+export const forgotPin = async (req: Request, res: Response) => {
+  const { phone_number } = req.body;
+
+  try {
+    const { error, exists, suspended, user } = await userServices.userExists(
+      phone_number
+    );
+
+    if (error) {
+      res.status(400).json({ error });
+      return;
+    }
+
+    if (!exists) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    if (suspended) {
+      res.status(403).json({ error: "Account suspended" });
+      return;
+    }
+
+    const otp = otpServices.generateOtp();
+
+    await otpServices.storeOtp(String(user?.id), otp);
+
+    res.status(200).json({
+      success: "OTP sent successfully",
+      otp,
+      user,
+    });
+  } catch (error) {
+    console.error("Error in forgot pin", error);
+    res.status(500).json({ error: "Error - forgot pin" });
+    return;
+  }
+};
+
+export const otpVerification = async (req: Request, res: Response) => {
+  const { otp, user_id } = req.body;
+
+  try {
+    const verify = await otpServices.verifyOtp(user_id, otp);
+
+    if (verify.error) {
+      res.status(500).json({ error: verify.error });
+      return;
+    }
+
+    res.status(200).json({ success: "OTP verified successfully" });
+  } catch (error) {
+    console.error("Error verifying OTP", error);
+    res.status(500).json({ error: "Error - verifying OTP" });
+    return;
+  }
+};
