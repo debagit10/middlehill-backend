@@ -216,12 +216,10 @@ export const editAdmin = async (req: Request, res: Response) => {
 
 export const changeAdminPassword = async (req: Request, res: Response) => {
   try {
-    const { admin_id } = req.params;
+    const { email } = req.params;
     const passwordData: EditPasswordData = req.body;
 
-    const { exists, admin, suspended } = await adminServices.adminExists(
-      admin_id
-    );
+    const { exists, admin, suspended } = await adminServices.adminExists(email);
 
     if (!exists) {
       res.status(404).json({ error: "Admin not found" });

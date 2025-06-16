@@ -28,7 +28,7 @@ adminRouter.put(
 
 adminRouter.put("/update/:admin_id", authAdmin, editAdmin);
 
-adminRouter.put("/change-password/:admin_id", authAdmin, changeAdminPassword);
+adminRouter.put("/change-password/:email", authAdmin, changeAdminPassword);
 
 adminRouter.put(
   "/suspend/:admin_id",
