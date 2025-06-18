@@ -117,7 +117,6 @@ const editUser = async (user_id: string, editData: EditUserData) => {
 };
 
 const deleteAccount = async (user_id: string) => {
-  console.log(user_id);
   try {
     const result = await User.update(
       { deleted: true },

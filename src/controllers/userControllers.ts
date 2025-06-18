@@ -338,11 +338,18 @@ export const verifyProfileEdit = async (req: Request, res: Response) => {
 };
 
 export const deleteUserAccount = async (req: Request, res: Response) => {
-  // const { user_id } = req.params;
+  const { pin } = req.body;
 
   const user_id = res.locals.user_id;
 
   try {
+    const { error } = await userServices.checkPin(user_id, pin);
+
+    if (error) {
+      res.status(400).json({ error });
+      return;
+    }
+
     const response = await userServices.deleteAccount(user_id);
 
     if (response.error == "Failed to delete account") {
@@ -438,10 +445,15 @@ export const forgotPin = async (req: Request, res: Response) => {
 
     await otpServices.storeOtp(String(user?.id), otp);
 
+    const accessToken = generateAccessToken({
+      userId: String(user?.id),
+    });
+
     res.status(200).json({
       success: "OTP sent successfully",
       otp,
       user,
+      accessToken: encryptToken(accessToken),
     });
   } catch (error) {
     console.error("Error in forgot pin", error);
