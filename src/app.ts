@@ -10,6 +10,8 @@ import { Request, Response } from "express";
 import { refreshToken } from "./utils/refreshToken";
 import { businessRouter } from "./routes/businessRoutes";
 import "./models/relationships";
+import { connectMono } from "./utils/mono";
+import { authUser } from "./middlewares/authorize";
 
 dotenv.config();
 
@@ -30,5 +32,6 @@ app.use("/api/business", businessRouter);
 
 app.post("/api/otp/resend/:user_id", resendOtp);
 app.post("/api/refreshToken", refreshToken);
+app.post("/api/connect-mono", authUser, connectMono);
 
 export default app;

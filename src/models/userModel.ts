@@ -10,6 +10,7 @@ interface UserAttributes {
   suspended: boolean;
   deleted: boolean;
   verified: boolean;
+  mono_id: string | null; // Mono account ID
 }
 
 interface UserCreationAttributes extends Optional<UserAttributes, "id"> {}
@@ -25,6 +26,7 @@ const User = sequelize.define<Model<UserAttributes, UserCreationAttributes>>(
     suspended: { type: DataTypes.BOOLEAN, defaultValue: false },
     deleted: { type: DataTypes.BOOLEAN, defaultValue: false },
     verified: { type: DataTypes.BOOLEAN, defaultValue: false },
+    mono_id: { type: DataTypes.STRING, allowNull: true }, // Mono account ID
   },
   {
     timestamps: true,
