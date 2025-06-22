@@ -6,6 +6,7 @@ interface UserAttributes {
   first_name: string;
   last_name: string;
   phone_number: string;
+  email: string;
   pin: string;
   suspended: boolean;
   deleted: boolean;
@@ -22,11 +23,12 @@ const User = sequelize.define<Model<UserAttributes, UserCreationAttributes>>(
     first_name: { type: DataTypes.STRING, allowNull: false },
     last_name: { type: DataTypes.STRING, allowNull: false },
     phone_number: { type: DataTypes.STRING, allowNull: false },
+    email: { type: DataTypes.STRING, allowNull: true, unique: true },
     pin: { type: DataTypes.STRING, allowNull: false },
     suspended: { type: DataTypes.BOOLEAN, defaultValue: false },
     deleted: { type: DataTypes.BOOLEAN, defaultValue: false },
     verified: { type: DataTypes.BOOLEAN, defaultValue: false },
-    mono_id: { type: DataTypes.STRING, allowNull: true }, // Mono account ID
+    mono_id: { type: DataTypes.STRING, allowNull: true },
   },
   {
     timestamps: true,

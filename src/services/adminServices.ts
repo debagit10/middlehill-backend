@@ -115,10 +115,29 @@ const updateAdmin = async (admin_id: string, editData: AdminData) => {
   }
 };
 
+const newPassword = async (admin_id: string, newPassword: string) => {
+  try {
+    const edit = await Admin.update(
+      { password: await hashPin(newPassword) },
+      { where: { id: admin_id } }
+    );
+
+    if (edit[0] === 0) {
+      return { error: "Failed to change password" };
+    }
+
+    return { success: "Password changed successfully" };
+  } catch (error) {
+    console.error(error);
+    return { error: "Error changing password" };
+  }
+};
+
 export const adminServices = {
   adminExists,
   addAdmin,
   getAdmin,
   getAllAdmins,
   updateAdmin,
+  newPassword,
 };

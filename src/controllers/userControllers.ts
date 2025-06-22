@@ -463,10 +463,10 @@ export const forgotPin = async (req: Request, res: Response) => {
 };
 
 export const otpVerification = async (req: Request, res: Response) => {
-  const { otp, user_id } = req.body;
+  const { otp, id } = req.body;
 
   try {
-    const verify = await otpServices.verifyOtp(user_id, otp);
+    const verify = await otpServices.verifyOtp(id, otp);
 
     if (verify.error) {
       res.status(500).json({ error: verify.error });

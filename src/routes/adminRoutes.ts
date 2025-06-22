@@ -8,6 +8,8 @@ import {
   loginAdmin,
   reinstateAdmin,
   suspendAdmin,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/adminControllers";
 import { authorizeAdmin } from "../middlewares/authenticate";
 import { authAdmin } from "../middlewares/authorize";
@@ -16,6 +18,7 @@ export const adminRouter = Router();
 
 adminRouter.post("/add", addAdmin);
 adminRouter.post("/login", loginAdmin);
+adminRouter.post("/forgot-password", forgotPassword);
 
 adminRouter.get("/getAll", authAdmin, authorizeAdmin("admin"), getAllAdmins);
 
@@ -25,6 +28,8 @@ adminRouter.put(
   authorizeAdmin("admin"),
   editAdmin
 );
+
+adminRouter.put("/reset-password/:admin_id", authAdmin, resetPassword);
 
 adminRouter.put("/update/:admin_id", authAdmin, editAdmin);
 

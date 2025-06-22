@@ -8,6 +8,7 @@ import {
   generateRefreshToken,
 } from "../config/token";
 import { Token } from "../models/tokenModel";
+import { otpServices } from "../utils/otp";
 
 interface AdminData {
   name: string;
@@ -307,6 +308,65 @@ export const deleteAdmin = async (req: Request, res: Response) => {
     res.status(200).json({ success });
   } catch (error) {
     console.error("Error in deleteAdmin controller", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { email } = req.body;
+
+    const { exists, error, admin } = await adminServices.adminExists(email);
+
+    if (!exists) {
+      res.status(404).json({ error: "Admin not found" });
+      return;
+    }
+
+    if (error) {
+      res.status(500).json({ error });
+      return;
+    }
+
+    const otp = otpServices.generateOtp();
+
+    await otpServices.storeOtp(String(admin?.id), otp);
+
+    const accessToken = generateAccessToken({
+      userId: String(admin?.id),
+      role: admin?.role,
+    });
+
+    res.status(200).json({
+      message: "OTP sent to your email",
+      admin,
+      otp,
+      accessToken: encryptToken(accessToken),
+    });
+  } catch (error) {
+    console.error("Error in forgotPassword controller", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { newPassword } = req.body;
+    const { admin_id } = req.params;
+
+    const { success, error } = await adminServices.newPassword(
+      admin_id,
+      newPassword
+    );
+
+    if (error) {
+      res.status(500).json({ error });
+      return;
+    }
+
+    res.status(200).json({ success, message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Error in resetPassword controller", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

@@ -76,14 +76,14 @@ const addUser = async (data: SignUpData) => {
   }
 };
 
-const verifyUser = async (otp: string, phone_number: string) => {
+const verifyUser = async (otp: string, user_id: string) => {
   try {
-    const verify = await otpServices.verifyOtp(phone_number, otp);
+    const verify = await otpServices.verifyOtp(user_id, otp);
 
     if (verify.success) {
       const response = await User.update(
         { verified: true },
-        { where: { id: phone_number } }
+        { where: { id: user_id } }
       );
 
       if (response) {
