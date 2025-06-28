@@ -3,6 +3,7 @@ import { sequelize } from "../config/database_config";
 
 interface StatementAttributes {
   id: string;
+  business_id: string;
   period: string;
   analysed: boolean;
 }
@@ -16,6 +17,11 @@ const Statement = sequelize.define<
   "statements",
   {
     id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    business_id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,

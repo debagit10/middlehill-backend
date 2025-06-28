@@ -35,3 +35,19 @@ export const connectMono = async (req: Request, res: Response) => {
     return;
   }
 };
+
+export const getStatement = async (accountId: string | null | undefined) => {
+  if (accountId == null || undefined) {
+    return { error: "Account ID not found" };
+  }
+
+  const response = await axios.get(
+    `https://api.mono.co/v1/accounts/${accountId}/transactions`,
+    {
+      headers: {
+        "mono-sec-key": process.env.MONO_SEC_KEY,
+      },
+    }
+  );
+  return response.data;
+};

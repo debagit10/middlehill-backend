@@ -9,6 +9,7 @@ import { resendOtp } from "./utils/resendOtp";
 import { Request, Response } from "express";
 import { refreshToken } from "./utils/refreshToken";
 import { businessRouter } from "./routes/businessRoutes";
+import { statementRouter } from "./routes/statementRoutes";
 import "./models/relationships";
 import { connectMono } from "./utils/mono";
 import { authUser } from "./middlewares/authorize";
@@ -29,6 +30,7 @@ app.use("/api/user", userRouter);
 app.use("/api/transaction", transactionRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/business", businessRouter);
+app.use("/api/statement", statementRouter);
 
 app.post("/api/otp/resend/:user_id", resendOtp);
 app.post("/api/refreshToken", refreshToken);
