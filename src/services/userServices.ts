@@ -9,6 +9,7 @@ interface SignUpData {
   pin: string;
   suspended: boolean;
   deleted: boolean;
+  email: string;
 }
 
 interface EditUserData {
