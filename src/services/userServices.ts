@@ -68,7 +68,6 @@ const addUser = async (data: SignUpData) => {
       ...data,
       pin: await hashPin(data.pin),
       verified: false,
-      email: "",
     });
 
     return { success: true, data: newUser };
