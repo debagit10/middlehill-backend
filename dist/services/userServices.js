@@ -7,10 +7,13 @@ const pin_1 = require("../utils/pin");
 const userExists = async (phone_number) => {
     try {
         const user = await userModel_1.User.findOne({
-            where: { phone_number, deleted: false, suspended: false },
+            where: { phone_number, deleted: false },
         });
         if (!user) {
             return { exists: false };
+        }
+        if (user.dataValues.suspended) {
+            return { suspended: true };
         }
         if (user.dataValues.verified) {
             return { exists: true, user: user?.dataValues };
@@ -26,12 +29,26 @@ const userExists = async (phone_number) => {
         return { exists: false, error: "Error checking user existence" };
     }
 };
+const getUser = async (user_id) => {
+    try {
+        const user = await userModel_1.User.findOne({ where: { id: user_id } });
+        if (!user) {
+            return { error: "User not found" };
+        }
+        return { success: "User found", user };
+    }
+    catch (error) {
+        console.error("Error getting user details", error);
+        return { exists: false, error: "Error getting user details" };
+    }
+};
 const addUser = async (data) => {
     try {
         const newUser = await userModel_1.User.create({
             ...data,
             pin: await (0, pin_1.hashPin)(data.pin),
             verified: false,
+            email: "",
         });
         return { success: true, data: newUser };
     }
@@ -40,11 +57,11 @@ const addUser = async (data) => {
         return { error: "Error registering user" };
     }
 };
-const verifyUser = async (otp, phone_number) => {
+const verifyUser = async (otp, user_id) => {
     try {
-        const verify = await otp_1.otpServices.verifyOtp(phone_number, otp);
+        const verify = await otp_1.otpServices.verifyOtp(user_id, otp);
         if (verify.success) {
-            const response = await userModel_1.User.update({ verified: true }, { where: { id: phone_number } });
+            const response = await userModel_1.User.update({ verified: true }, { where: { id: user_id } });
             if (response) {
                 return { verified: true, success: verify.success };
             }
@@ -72,7 +89,6 @@ const editUser = async (user_id, editData) => {
     }
 };
 const deleteAccount = async (user_id) => {
-    console.log(user_id);
     try {
         const result = await userModel_1.User.update({ deleted: true }, { where: { id: user_id } });
         console.log(result);
@@ -86,7 +102,7 @@ const deleteAccount = async (user_id) => {
         return { error: "Error deleting account" };
     }
 };
-const changePin = async (user_id, editPinData) => {
+const checkPin = async (user_id, pin) => {
     try {
         const user = await userModel_1.User.findOne({
             where: { id: user_id, deleted: false, suspended: false },
@@ -95,11 +111,20 @@ const changePin = async (user_id, editPinData) => {
         if (!user) {
             return { error: "User not found or account is suspended/deleted" };
         }
-        const checkPin = await (0, pin_1.verifyPin)(editPinData.curPin, user.dataValues.pin);
+        const checkPin = await (0, pin_1.verifyPin)(pin, user.dataValues.pin);
         if (!checkPin) {
             return { error: "Incorrect current pin" };
         }
-        const edit = await userModel_1.User.update({ pin: await (0, pin_1.hashPin)(editPinData.newPin) }, { where: { id: user_id } });
+        return { success: "Pin verified successfully" };
+    }
+    catch (error) {
+        console.error("Error verifying pin", error);
+        return { error: "Error verifying pin" };
+    }
+};
+const changePin = async (user_id, newPin) => {
+    try {
+        const edit = await userModel_1.User.update({ pin: await (0, pin_1.hashPin)(newPin) }, { where: { id: user_id } });
         if (edit[0] === 0) {
             return { error: "Failed to edit pin" };
         }
@@ -115,6 +140,8 @@ exports.userServices = {
     addUser,
     userExists,
     editUser,
+    checkPin,
     changePin,
     deleteAccount,
+    getUser,
 };

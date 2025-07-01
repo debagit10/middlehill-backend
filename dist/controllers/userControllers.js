@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeUserPin = exports.deleteUserAccount = exports.verifyProfileEdit = exports.editProfile = exports.signInUser = exports.loginUser = exports.verify = exports.signUpUser = void 0;
+exports.otpVerification = exports.forgotPin = exports.changeUserPin = exports.confirmPin = exports.deleteUserAccount = exports.verifyProfileEdit = exports.editProfile = exports.userDetails = exports.signInUser = exports.loginUser = exports.verify = exports.signUpUser = void 0;
 const userServices_1 = require("../services/userServices");
 const otp_1 = require("../utils/otp");
 const pin_1 = require("../utils/pin");
@@ -12,6 +12,9 @@ const signUpUser = async (req, res) => {
         if (userCheck.exists) {
             res.status(409).json({ error: "User already exists" });
             return;
+        }
+        if (userCheck.suspended) {
+            res.status(403).json({ error: "Account suspended" });
         }
         if (userCheck.error === "User found but not verified") {
             const otp = otp_1.otpServices.generateOtp();
@@ -87,8 +90,11 @@ const loginUser = async (req, res) => {
     const loginData = req.body;
     try {
         const userExists = await userServices_1.userServices.userExists(loginData.phone_number);
+        if (userExists.suspended) {
+            res.status(403).json({ error: "Account suspended" });
+        }
         if (userExists.error === "User found but not verified") {
-            res.status(409).json({ error: "User found but not verified" });
+            res.status(403).json({ error: "User found but not verified" });
             return;
         }
         if (userExists.error === "Error checking user existence") {
@@ -128,6 +134,9 @@ const signInUser = async (req, res) => {
     try {
         const signInData = req.body;
         const userExists = await userServices_1.userServices.userExists(signInData.phone_number);
+        if (userExists.suspended) {
+            res.status(403).json({ error: "Account suspended" });
+        }
         if (userExists.error === "User found but not verified") {
             res.status(409).json({ error: "User found but not verified" });
             return;
@@ -166,6 +175,24 @@ const signInUser = async (req, res) => {
     }
 };
 exports.signInUser = signInUser;
+const userDetails = async (req, res) => {
+    const user_id = res.locals.user_id;
+    try {
+        const response = await userServices_1.userServices.getUser(user_id);
+        if (response.error === "User not found") {
+            res.status(404).json(response);
+            return;
+        }
+        res.status(200).json(response);
+        return;
+    }
+    catch (error) {
+        console.error("Error getting user details ", error);
+        res.status(500).json({ error: "Error - get user details" });
+        return;
+    }
+};
+exports.userDetails = userDetails;
 const editProfile = async (req, res) => {
     const newData = req.body;
     // const { user_id } = req.params;
@@ -212,9 +239,14 @@ const verifyProfileEdit = async (req, res) => {
 };
 exports.verifyProfileEdit = verifyProfileEdit;
 const deleteUserAccount = async (req, res) => {
-    // const { user_id } = req.params;
+    const { pin } = req.body;
     const user_id = res.locals.user_id;
     try {
+        const { error } = await userServices_1.userServices.checkPin(user_id, pin);
+        if (error) {
+            res.status(400).json({ error });
+            return;
+        }
         const response = await userServices_1.userServices.deleteAccount(user_id);
         if (response.error == "Failed to delete account") {
             res.status(500).json({ error: response.error });
@@ -229,12 +261,35 @@ const deleteUserAccount = async (req, res) => {
     }
 };
 exports.deleteUserAccount = deleteUserAccount;
+const confirmPin = async (req, res) => {
+    const { pin } = req.body;
+    const user_id = res.locals.user_id;
+    try {
+        const { error, success } = await userServices_1.userServices.checkPin(user_id, pin);
+        if (error) {
+            res.status(400).json({ error });
+            return;
+        }
+        const otp = otp_1.otpServices.generateOtp();
+        await otp_1.otpServices.storeOtp(user_id, otp);
+        res.status(200).json({ success, otp });
+    }
+    catch (error) {
+        console.error("Error confirming pin", error);
+        res.status(500).json({ error: "Error - confriming pin" });
+    }
+};
+exports.confirmPin = confirmPin;
 const changeUserPin = async (req, res) => {
     const changePinData = req.body;
     const user_id = res.locals.user_id;
-    //const { user_id } = req.params;
     try {
-        const response = await userServices_1.userServices.changePin(user_id, changePinData);
+        const verify = await otp_1.otpServices.verifyOtp(user_id, changePinData.otp_code);
+        if (verify.error) {
+            res.status(500).json({ error: verify.error });
+            return;
+        }
+        const response = await userServices_1.userServices.changePin(user_id, changePinData.newPin);
         if (response.error) {
             res.status(500).json({ error: response.error });
             return;
@@ -248,3 +303,55 @@ const changeUserPin = async (req, res) => {
     }
 };
 exports.changeUserPin = changeUserPin;
+const forgotPin = async (req, res) => {
+    const { phone_number } = req.body;
+    try {
+        const { error, exists, suspended, user } = await userServices_1.userServices.userExists(phone_number);
+        if (error) {
+            res.status(400).json({ error });
+            return;
+        }
+        if (!exists) {
+            res.status(404).json({ error: "User not found" });
+            return;
+        }
+        if (suspended) {
+            res.status(403).json({ error: "Account suspended" });
+            return;
+        }
+        const otp = otp_1.otpServices.generateOtp();
+        await otp_1.otpServices.storeOtp(String(user?.id), otp);
+        const accessToken = (0, token_1.generateAccessToken)({
+            userId: String(user?.id),
+        });
+        res.status(200).json({
+            success: "OTP sent successfully",
+            otp,
+            user,
+            accessToken: (0, token_1.encryptToken)(accessToken),
+        });
+    }
+    catch (error) {
+        console.error("Error in forgot pin", error);
+        res.status(500).json({ error: "Error - forgot pin" });
+        return;
+    }
+};
+exports.forgotPin = forgotPin;
+const otpVerification = async (req, res) => {
+    const { otp, id } = req.body;
+    try {
+        const verify = await otp_1.otpServices.verifyOtp(id, otp);
+        if (verify.error) {
+            res.status(500).json({ error: verify.error });
+            return;
+        }
+        res.status(200).json({ success: "OTP verified successfully" });
+    }
+    catch (error) {
+        console.error("Error verifying OTP", error);
+        res.status(500).json({ error: "Error - verifying OTP" });
+        return;
+    }
+};
+exports.otpVerification = otpVerification;

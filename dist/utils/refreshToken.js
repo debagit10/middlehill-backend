@@ -10,7 +10,8 @@ const token_1 = require("../config/token");
 const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const ACCESS_SECRET = process.env.JWT_SECRET;
 const refreshToken = async (req, res) => {
-    const { refreshToken } = req.body;
+    const refreshToken = req.cookies.refreshToken;
+    console.log({ refreshToken });
     const decryptedToken = String((0, token_1.decryptToken)(refreshToken));
     const tokenExists = await tokenModel_1.Token.findOne({
         where: { token: decryptedToken },
@@ -33,9 +34,14 @@ const refreshToken = async (req, res) => {
             user_id: decoded.userId,
             token: newRefreshToken,
         });
-        res.json({
+        res.cookie("refreshToken", (0, token_1.encryptToken)(newRefreshToken), {
+            httpOnly: true,
+            secure: false,
+            sameSite: "none",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+        res.status(200).json({
             accessToken: (0, token_1.encryptToken)(newAccessToken),
-            refreshToken: (0, token_1.encryptToken)(newRefreshToken),
         });
         return;
     }

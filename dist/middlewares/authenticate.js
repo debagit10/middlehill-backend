@@ -5,9 +5,10 @@ const authorizeAdmin = (...allowedRoles) => {
     return (req, res, next) => {
         const loggedIn = res.locals.admin;
         if (!allowedRoles.includes(loggedIn.role)) {
-            return res
+            res
                 .status(403)
                 .json({ error: "You do not have permission to perform this action" });
+            return;
         }
         next();
     };

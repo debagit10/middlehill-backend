@@ -338,12 +338,12 @@ export const verifyProfileEdit = async (req: Request, res: Response) => {
 };
 
 export const deleteUserAccount = async (req: Request, res: Response) => {
-  const { pin } = req.body;
+  const { otp } = req.body;
 
   const user_id = res.locals.user_id;
 
   try {
-    const { error } = await userServices.checkPin(user_id, pin);
+    const { error } = await otpServices.verifyOtp(user_id, otp);
 
     if (error) {
       res.status(400).json({ error });

@@ -11,18 +11,16 @@ const adminExists = async (email, admin_id) => {
             orConditions.push({ email });
         if (admin_id)
             orConditions.push({ id: admin_id });
-        console.log(admin_id);
         const admin = await adminModel_1.Admin.findOne({
             where: {
-                [sequelize_1.Op.and]: [
-                    { [sequelize_1.Op.or]: orConditions },
-                    { deleted: false },
-                    { suspended: false },
-                ],
+                [sequelize_1.Op.and]: [{ [sequelize_1.Op.or]: orConditions }, { deleted: false }],
             },
         });
         if (!admin) {
             return { exists: false };
+        }
+        if (admin.dataValues.suspended) {
+            return { suspended: true };
         }
         return {
             exists: true,
@@ -64,15 +62,51 @@ const getAdmin = async (admin_id) => {
 };
 const getAllAdmins = async () => {
     try {
-        const admins = await adminModel_1.Admin.findAll();
+        const admins = await adminModel_1.Admin.findAll({
+            where: { deleted: false },
+            attributes: ["name", "email", "role", "id", "suspended", "createdAt"],
+            order: [["createdAt", "DESC"]],
+        });
         if (admins.length === 0) {
             return { error: "No admins found" };
         }
-        return { success: "Admins retrieved", data: admins };
+        return { success: "Admins retrieved", admins };
     }
     catch (error) {
         console.log("Error in getting all admins", error);
         return { error: "Error getting all admins" };
+    }
+};
+const updateAdmin = async (admin_id, editData) => {
+    try {
+        const update = await adminModel_1.Admin.update({ ...editData }, { where: { id: admin_id } });
+        if (update[0] === 0) {
+            return { error: "Failed to update admin profile" };
+        }
+        const updatedAdmin = await adminModel_1.Admin.findOne({
+            where: { id: admin_id },
+        });
+        return {
+            success: "Admin profile updated successfully",
+            admin: updatedAdmin?.dataValues,
+        };
+    }
+    catch (error) {
+        console.error(error);
+        return { error: "Error editting admin" };
+    }
+};
+const newPassword = async (admin_id, newPassword) => {
+    try {
+        const edit = await adminModel_1.Admin.update({ password: await (0, pin_1.hashPin)(newPassword) }, { where: { id: admin_id } });
+        if (edit[0] === 0) {
+            return { error: "Failed to change password" };
+        }
+        return { success: "Password changed successfully" };
+    }
+    catch (error) {
+        console.error(error);
+        return { error: "Error changing password" };
     }
 };
 exports.adminServices = {
@@ -80,4 +114,6 @@ exports.adminServices = {
     addAdmin,
     getAdmin,
     getAllAdmins,
+    updateAdmin,
+    newPassword,
 };

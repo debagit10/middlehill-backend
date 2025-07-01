@@ -16,7 +16,6 @@ exports.Admin = database_config_1.sequelize.define("admin", {
     email: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
-        unique: true,
     },
     password: {
         type: sequelize_1.DataTypes.STRING,

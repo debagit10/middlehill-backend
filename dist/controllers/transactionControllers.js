@@ -1,17 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteTransaction = exports.getTransactions = exports.addTransaction = void 0;
+exports.allTransactions = exports.deleteTransaction = exports.getTransactions = exports.addTransaction = void 0;
 const transactionServices_1 = require("../services/transactionServices");
 const addTransaction = async (req, res) => {
     const transactionData = req.body;
     const user_id = res.locals.user_id;
     try {
-        const response = await transactionServices_1.transactionServices.addTransaction({
-            ...transactionData,
-            user_id,
-        });
+        const response = await transactionServices_1.transactionServices.addTransaction(transactionData, user_id);
         if (response.error) {
             res.status(500).json({ error: "Failed to add transaction" });
+            return;
         }
         res.status(201).json({ success: "Transaction added", data: response.data });
         return;
@@ -62,3 +60,20 @@ const deleteTransaction = async (req, res) => {
     }
 };
 exports.deleteTransaction = deleteTransaction;
+const allTransactions = async (req, res) => {
+    try {
+        const response = await transactionServices_1.transactionServices.allTransaction();
+        if (response.transactions == null) {
+            res.status(404).json(response);
+            return;
+        }
+        res.status(200).json(response);
+        return;
+    }
+    catch (error) {
+        console.log("Error in get transactions controller", error);
+        res.status(500).json({ error: "Failed to get transactions" });
+        return;
+    }
+};
+exports.allTransactions = allTransactions;

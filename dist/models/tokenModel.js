@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Token = void 0;
 const sequelize_1 = require("sequelize");
 const database_config_1 = require("../config/database_config");
-const Token = database_config_1.sequelize.define("otp", {
+const Token = database_config_1.sequelize.define("token", {
     id: {
         type: sequelize_1.DataTypes.UUID,
         defaultValue: sequelize_1.DataTypes.UUIDV4,

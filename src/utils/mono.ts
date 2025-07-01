@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import axios from "axios";
 import { User } from "../models/userModel";
 
+import { Mono } from "mono-node";
+const monoClient = new Mono({ secretKey: String(process.env.MONO_SEC_KEY) });
+
 export const connectMono = async (req: Request, res: Response) => {
   const user_id = res.locals.user_id;
 
@@ -41,13 +44,26 @@ export const getStatement = async (accountId: string | null | undefined) => {
     return { error: "Account ID not found" };
   }
 
-  const response = await axios.get(
-    `https://api.mono.co/v1/accounts/${accountId}/transactions`,
+  // const response = await axios.get(
+  //   `https://api.withmono.com/accounts/${accountId}/transactions`,
+  //   {
+  //     headers: {
+  //       "mono-sec-key": process.env.MONO_SEC_KEY,
+  //     },
+  //   }
+  // );
+  // return response.data;
+  const response = await monoClient.account.getAccountStatement(
     {
-      headers: {
-        "mono-sec-key": process.env.MONO_SEC_KEY,
-      },
+      accountId: accountId,
+      output: "json",
+      period: "",
+    },
+    (err: any, results: any) => {
+      if (err) console.error("Statement error:", err);
+      else console.log("Statement data:", results);
     }
   );
-  return response.data;
+
+  return response;
 };

@@ -7,7 +7,7 @@ exports.otpServices = void 0;
 const otp_generator_1 = __importDefault(require("otp-generator"));
 const otpModel_1 = require("../models/otpModel");
 const generateOtp = () => {
-    const otp = otp_generator_1.default.generate(6, {
+    const otp = otp_generator_1.default.generate(4, {
         digits: true,
         upperCaseAlphabets: false,
         specialChars: false,

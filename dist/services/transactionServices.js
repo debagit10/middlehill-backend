@@ -2,13 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.transactionServices = void 0;
 const transactionModel_1 = require("../models/transactionModel");
-const addTransaction = async (data) => {
+const addTransaction = async (data, user_id) => {
     try {
-        const newTransaction = await transactionModel_1.Transaction.create({
-            ...data,
+        const transactions = Array.isArray(data) ? data : [data];
+        const newTransactions = await transactionModel_1.Transaction.bulkCreate(transactions.map((txn) => ({
+            ...txn,
+            user_id,
             deleted: false,
-        });
-        return { success: true, data: newTransaction };
+        })));
+        return { success: true, data: newTransactions };
     }
     catch (error) {
         console.log("Error in adding transaction service", error);
@@ -17,7 +19,10 @@ const addTransaction = async (data) => {
 };
 const userTransactions = async (user_id) => {
     try {
-        const transactions = await transactionModel_1.Transaction.findAll({ where: { user_id } });
+        const transactions = await transactionModel_1.Transaction.findAll({
+            where: { user_id, deleted: false },
+            order: [["createdAt", "DESC"]],
+        });
         if (transactions.length === 0) {
             return { error: "No transactions found" };
         }
@@ -56,9 +61,30 @@ const checkTransaction = async (transaction_id) => {
         return { error: "Error checking transaction" };
     }
 };
+const allTransaction = async () => {
+    try {
+        const transactions = await transactionModel_1.Transaction.findAll({
+            where: { deleted: false },
+            order: [["createdAt", "DESC"]],
+        });
+        if (!transactions.length) {
+            return { error: "No transactions found.", transactions: null };
+        }
+        return {
+            success: "transactions retrieved",
+            transactions,
+            count: transactions.length,
+        };
+    }
+    catch (error) {
+        console.log("Error in getting transaction service", error);
+        return { error: "Error getting transactions" };
+    }
+};
 exports.transactionServices = {
     addTransaction,
     userTransactions,
     deleteTransaction,
     checkTransaction,
+    allTransaction,
 };

@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authUser = void 0;
+exports.authAdmin = exports.authUser = void 0;
 const token_1 = require("../config/token");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const authUser = async (req, res, next) => {
@@ -38,3 +38,35 @@ const authUser = async (req, res, next) => {
     }
 };
 exports.authUser = authUser;
+const authAdmin = async (req, res, next) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            res.status(401).json({ error: "Authorization header missing" });
+            return;
+        }
+        const token = authHeader.split(" ")[1];
+        if (!token) {
+            res.status(401).json({ error: "Token not provided" });
+            return;
+        }
+        const decryptedToken = (0, token_1.decryptToken)(token);
+        if (!decryptedToken) {
+            res.status(401).json({ error: "Invalid token decryption" });
+            return;
+        }
+        const payload = jsonwebtoken_1.default.verify(decryptedToken, process.env.JWT_SECRET);
+        if (!payload || typeof payload !== "object" || !("userId" in payload)) {
+            res.status(401).json({ error: "Token verification failed" });
+            return;
+        }
+        res.locals.admin = payload;
+        next();
+    }
+    catch (error) {
+        console.error("Auth error:", error.message || error);
+        res.status(401).json({ error: "Error authorizing user." });
+        return;
+    }
+};
+exports.authAdmin = authAdmin;

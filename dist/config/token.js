@@ -14,7 +14,7 @@ const generateAccessToken = (payload) => {
     const expiresIn = process.env.ACCESS_TOKEN_EXPIRY;
     const options = {
         algorithm: "HS256",
-        expiresIn: "15m", // Default expiration time
+        expiresIn: "1h", // Default expiration time
     };
     if (!secret || !expiresIn) {
         throw new Error("JWT_REFRESH_SECRET or REFRESH_TOKEN_EXPIRY is not defined");
@@ -65,7 +65,8 @@ const decryptToken = (encryptedToken) => {
         return null;
     }
     try {
-        const bytes = crypto_js_1.default.AES.decrypt(encryptedToken, secretKey);
+        const decodedToken = decodeURIComponent(encryptedToken);
+        const bytes = crypto_js_1.default.AES.decrypt(decodedToken, secretKey);
         const decryptedToken = bytes.toString(crypto_js_1.default.enc.Utf8);
         return decryptedToken || null;
     }
