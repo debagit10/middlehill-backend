@@ -13,6 +13,7 @@ interface SignUpData {
   last_name: string;
   phone_number: string;
   pin: string;
+  email: string;
 }
 
 interface VerifyData {
